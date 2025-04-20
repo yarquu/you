@@ -1,0 +1,103 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <cctype>
+
+using namespace std;
+
+const string vowels = "aeiouAEIOU";
+const string consonants = "bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ";
+const string vowelCodes = "0123401234";
+
+bool isYVowel(size_t pos, const string& text) {
+    if (pos == 0) return false; 
+    if (tolower(text[pos-1]) == 'y') return false; 
+    return true; 
+}
+
+char encryptChar(char c, size_t pos, const string& text) {
+    if (tolower(c) == 'y') {
+        return isYVowel(pos, text) ? '5' : 
+               consonants[consonants.length() - 1 - consonants.find(toupper(c))];
+    }
+    if (vowels.find(c) != string::npos) {
+        return vowelCodes[vowels.find(c)];
+    } else if (consonants.find(c) != string::npos) {
+        size_t cons_pos = consonants.find(c);
+        char opposite = consonants[consonants.length() - 1 - cons_pos];
+        return isupper(c) ? toupper(opposite) : tolower(opposite);
+    }
+    return c;
+}
+
+char decryptChar(char c, size_t pos, const string& text) {
+    if (c == '5') {
+        return isYVowel(pos, text) ? 'y' : 'Y';
+    }
+    if (isdigit(c) && c >= '0' && c <= '4') {
+        size_t vowel_pos = vowelCodes.find(c);
+        return vowels[vowel_pos];
+    } else if (consonants.find(tolower(c)) != string::npos) {
+        char lowerC = tolower(c);
+        size_t cons_pos = consonants.find(lowerC);
+        char opposite = consonants[consonants.length() - 1 - cons_pos];
+        return isupper(c) ? toupper(opposite) : tolower(opposite);
+    }
+    return c;
+}
+
+string encrypt(const string& text) {
+    string result;
+    for (size_t i = 0; i < text.length(); ++i) {
+        result += encryptChar(text[i], i, text);
+    }
+    return result;
+}
+
+string decrypt(const string& text) {
+    string result;
+    for (size_t i = 0; i < text.length(); ++i) {
+        result += decryptChar(text[i], i, text);
+    }
+    return result;
+}
+
+void printHelp() {
+    cout << "\nПояснение работы программы:\n";
+    cout << "1. Шифровка текста:\n   - Гласные буквы заменяются на цифры: a=0, e=1, i=2, o=3, u=4, y=5\n   - Согласные буквы заменяются на согласные в обратном порядке алфавита\n";
+    cout << "     (b→z, c→y, d→x и т.д.) с сохранением регистра\n";
+    cout << "Пример:\n'myth' → 'm25h'\n\n";
+    cout << "2. Расшифровка текста:\n   - Цифры 0-5 заменяются на соответствующие гласные буквы\n   - Согласные буквы заменяются обратно по тому же принципу\n";
+     cout << "Пример:\n'm25h' → 'myth'\n\n";
+    cout << "3. Буква Y является и гласной и согласной, так как в английском языке она является согласной, если стоит в начале слова, а гласной - во всех других случаях.\n";
+    cout << "Пример:\n'Yellow' → 'm51zz3w'\n'Puppy' → 'l4ll5'\n\n";
+}
+
+int main() {
+    int choice;
+    string text;
+    
+    cout << "Привет Лиза, выбирай, пожалуйста: \n1. Шифровка(только на английском)\n2. Расшифровка(тоже только на английском)\n3. Пояснение работы кода\nВыберите: ";
+    cin >> choice;
+    cin.ignore();
+    
+    if (choice == 3) {
+        printHelp();
+        return 0;
+    }
+    
+    if (choice == 1 || choice == 2) {
+        cout << "Введите текст на английском языке: ";
+        getline(cin, text);
+        
+        if (choice == 1) {
+            cout << "Результат: \n" << encrypt(text) << endl;
+        } else {
+            cout << "Результат: \n" << decrypt(text) << endl;
+        }
+    } else {
+        cout << "Неверный выбор!" << endl;
+    }
+    
+    return 0;
+}
